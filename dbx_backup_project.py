@@ -149,7 +149,7 @@ def main(fname, created_dropbox_dir = False):
             for file in ignore_files:
                 newzip.write(file)
             print("The {}.zip archive has been created and the files have been written to it!".format(fname))
-        
+        #backup zip ахрива с файлами на Dropbox
         dropbox_backup(in_backup_path)
             
 if __name__ == '__main__':
