@@ -1,0 +1,12 @@
+default:
+- desktop.ini
+- thumbs.db
+- .ds_store
+- .icon
+- .dropbox
+- .dropbox.attr
+- .py
+- ignored_list.yaml
+- .ipynb
+optional:
+- Null
