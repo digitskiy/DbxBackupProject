@@ -19,7 +19,7 @@ This project was built with modularity, extensibility and simplicity in mind.
 
 ## Installation
 
-1. git clone <https://github.com/CpanelInc/backup-transport-dropbox.git>
+1. git clone <https://github.com/IniSlice/DbxBackupProject.git>
 2. Place the dbx_backup_project.py script in the directory containing the files and folders for backing up to Dropbox;
 3. Run the script, this will create the  ignored_list.yaml file;
 4. Open file ignored_list.yaml and add file names to the "Optional" item and folders that you do not want to archive and backup (this item is optional);
@@ -47,16 +47,16 @@ This project is in active development. I still have a lot
 interesting ideas that can be implemented. Therefore, I will be grateful to you for
 assistance in the development and improvement of this project.
 
-Pull requests appreciated! However, at the beginning you should read [CONTRIBUTING.md](https://github.com/IniSlice/test_repository/blob/master/CONTRIBUTING.md), 
-to learn more about our code of conduct and the process for sending us [Pull requests](https://github.com/IniSlice/test_repository/pulls).    
-If you find a bug or have a request for improvement, please report a problem [Issue](https://github.com/inislice/test_repository/issues).
+Pull requests appreciated! However, at the beginning you should read [CONTRIBUTING.md](https://github.com/IniSlice/DbxBackupProject/blob/master/CONTRIBUTING.md), 
+to learn more about our code of conduct and the process for sending us [Pull requests](https://github.com/IniSlice/DbxBackupProject/pulls).    
+If you find a bug or have a request for improvement, please report a problem [Issue](https://github.com/IniSlice/DbxBackupProject/issues).
 
 ## Authors
 
 [**Sergey Chernetskiy**](https://github.com/IniSlice) - developer of this project.    
-See also the list of [contributors](https://github.com/IniSlice/test_repository/graphs/contributors), who participated in this project.
+See also the list of [contributors](https://github.com/IniSlice/DbxBackupProject/graphs/contributors), who participated in this project.
 
 ## License
 
 This project is licensed under the MIT License.   
-See file [LICENSE.md](https://github.com/IniSlice/test_repository/blob/master/LICENSE) for details.
+See file [LICENSE.md](https://github.com/IniSlice/DbxBackupProject/blob/master/LICENSE) for details.
