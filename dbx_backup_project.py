@@ -11,7 +11,7 @@ import dropbox
 from dropbox.exceptions import ApiError
 from dropbox.files import GetMetadataError
 
-dbx = dropbox.Dropbox('854_Wfvr2vwAAAAAAAAAATj82crtilzSa_8-IM_U7vHJeMkVd3WvaRo1i82nrZG0')#, timeout=None
+dbx = dropbox.Dropbox('')#YOUR_ACCESS_TOKEN
 dbx.check_and_refresh_access_token()#Проверяет, нужно ли обновить токен доступа, и, если возможно, обновляет
 
 #Получить путь дериктрии со скриптом
