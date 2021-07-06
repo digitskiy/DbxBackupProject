@@ -11,11 +11,12 @@ import dropbox
 from dropbox.exceptions import ApiError
 from dropbox.files import GetMetadataError
 
-dbx = dropbox.Dropbox('')#YOUR_ACCESS_TOKEN
-dbx.check_and_refresh_access_token()#Проверяет, нужно ли обновить токен доступа, и, если возможно, обновляет
+dbx = dropbox.Dropbox('<YOUR_ACCESS_TOKEN>')
+#Checks if the access token needs to be updated and updates if possible
+dbx.check_and_refresh_access_token()
 
-#Получить путь дериктрии со скриптом
 def get_script_dir(follow_symlinks=True):
+    """ Get the path of the script directory """
     if getattr(sys, 'frozen', False): 
         path = os.path.abspath(sys.executable)
     else:
@@ -24,14 +25,14 @@ def get_script_dir(follow_symlinks=True):
         path = os.path.realpath(path)
     return os.path.dirname(path)
 
-#Текущая дата служит именем подкаталога в основном каталоге
+#The current date is the name of a subdirectory in the main directory
 today = time.strftime('%d.%m.%Y')
-#Текущее время служит именем zip-архива
+#The current time serves as the name of the zip archive
 now = time.strftime('%H_%M_%S')
 
 dir_name = "/Backup/"+today
 
-#список «Игнорируемые файлы» 
+#List of ignored files
 ignored_files = {
     "default": [
         "desktop.ini",
@@ -46,17 +47,20 @@ ignored_files = {
     "optional": [None]
         }
 
-#Функция, которая проверяет список «Игнорируемые файлы» 
-#Затем вы можете исключить такие файлы при загрузки их на dropbox.
 def check_ignored_files(ydict, dir_path=get_script_dir()):
-    ydict = copy.deepcopy(ydict)#Создаём копию словаря 
+    """
+    Function that checks the list of ignored files.
+    Then you can exclude such files when uploading them to dropbox.
+    """
+    #Making a full copy of the dictionary
+    ydict = copy.deepcopy(ydict)
     filename = '{path}{sep}ignored_list.yaml'.format(path=dir_path, sep=os.sep)
     try:
         with open(filename, 'r+', encoding='utf-8') as rdata:
             yaml_rdata = yaml.safe_load(rdata)
             if isinstance(yaml_rdata, dict):
-                default = yaml_rdata.get("default", None)#получаяем значение словаря по заданному ключу
-                optional = yaml_rdata.get("optional", None)#Если ключи не найдены, то возвращяем None
+                default = yaml_rdata.get("default", None)
+                optional = yaml_rdata.get("optional", None)
                 count = 0
                 if isinstance(optional, list):
                     del ydict["optional"][:]
@@ -66,13 +70,11 @@ def check_ignored_files(ydict, dir_path=get_script_dir()):
                         elif i!=None:
                             count+=1
                 if (not isinstance(default, list)) or (default!=ydict["default"]) or (yaml_rdata.keys()!=ydict.keys()) or (count!=0):
-                    #raise AssertionError()
                     with open(filename, 'w') as wdata:
                         yaml.dump({"default":ydict["default"], "optional":ydict["optional"]}, wdata, default_flow_style=False)
                         print('File overwritten! step1')
             else:
                 raise AssertionError()
-
     except (YAMLError, IOError, FileNotFoundError, AssertionError):
         with open(filename, 'w') as wdata:
             yaml.dump(ignored_files, wdata, default_flow_style=False)
@@ -82,46 +84,53 @@ def check_ignored_files(ydict, dir_path=get_script_dir()):
     finally:
         return ydict
 
-
 def get_list_ignored_file(ignored_dict, dir_path=get_script_dir()):
+    """ Forming a list files and directories in the directory tree to be placed in the backup zip archive """
     lst = []
-    #Путь для файлов и папок которые нужно поместить в backup zip-архив 
+    #Path for files and folders to be placed in the backup zip archive
     from_backup_path='{script_dir}'.format(script_dir=dir_path)
-
-    #Проверка файла в игнор листе
     ignore_files_and_dirs = set(ignored_dict["default"]+ignored_dict["optional"])
-
+    #Checking a file in the ignore list
     for root, dirs, files in os.walk(from_backup_path, topdown=True):
-    #Проверка файла в игнор листе
-        dirs[:] = [d for d in dirs if (d not in ignore_files_and_dirs)]#Исключение каталога из дерева каталогов 
-        files = [file for file in files if (file not in ignore_files_and_dirs) and (os.path.splitext(file)[1] not in ignore_files_and_dirs)] #Исключение файлов из каталогов
+    #Excluding a directory from a directory tree
+        dirs[:] = [d for d in dirs if (d not in ignore_files_and_dirs)]
+        #Excluding files from directories
+        files = [file for file in files if (file not in ignore_files_and_dirs) and (os.path.splitext(file)[1] not in ignore_files_and_dirs)]
         for file in files:
             lst.append(os.path.join(root, file))
     return lst
 
-
-# если папка не существует в Dropbox то создать её
 def check_dropbox_dir():
+    """ 
+    Checks for a backup folder in Dropbox.
+    If there is no folder, then it is created.
+    """
     try:
         dbx.files_get_metadata(dir_name, include_deleted=False)
     except ApiError:
-        dbx.files_create_folder_v2(dir_name, False)#Создать папку по указанному пути
+        #Create a folder at the specified path
+        dbx.files_create_folder_v2(dir_name, False)
         print("Created "+ dir_name + " on Dropbox")
     except Exception as e:
         print("Error {}! Could not create dir with name {}!".format(e, dir_name))
         return False
     return True
 
-
 def dropbox_backup(dir_path):
-    with open(dir_path, 'rb') as file: # открываем файл в режиме чтение побайтово
+    """ Uploading zip archive depending on its size on the dropbox """
+    #Open the file in byte-by-byte read mode
+    with open(dir_path, 'rb') as file:
         file_size = os.path.getsize(dir_path)
         CHUNK_SIZE = 100 * (1024**2) 
         try:
-            if file_size <= CHUNK_SIZE:# если размер файла для бэкапа меньше 100 Мб то используем стандарный метод загрузки файла на дропбокс.
-                # загружаем файл: первый аргумент (file.read()) - какой файл; второй - название, которое будет присвоено файлу уже на дропбоксе.
+            #if the file size for backup is less than 100 MB, then use the standard method of uploading the file to the dropbox.
+            if file_size <= CHUNK_SIZE:
+                #load the file: the first argument is the byte value of the file;  
+                #the second is the name that will be assigned to the file already on the dropbox;
+                #the third is the file overwrite mode on the dropbox
                 dbx.files_upload(file.read(), dir_name+'/'+now+'.zip', mode=dropbox.files.WriteMode.overwrite) 
-            else: #иначе разбиваем файл на куски CHUNK и загружаем каждый кусок используя сиансы загрузки
+            #else we split the file into chunks and download each chunk using upload seances
+            else: 
                 upload_session_start_result = dbx.files_upload_session_start(file.read(CHUNK_SIZE))
                 cursor = dropbox.files.UploadSessionCursor(session_id=upload_session_start_result.session_id, offset=file.tell())
                 commit = dropbox.files.CommitInfo(path=dir_name+'/'+now+'.zip', mode=dropbox.files.WriteMode.overwrite)
@@ -130,26 +139,25 @@ def dropbox_backup(dir_path):
                         print (dbx.files_upload_session_finish(file.read(CHUNK_SIZE), cursor, commit))
                     else:
                         dbx.files_upload_session_append(file.read(CHUNK_SIZE), cursor.session_id, cursor.offset)
-                        cursor.offset = file.tell()
-        
+                        cursor.offset = file.tell() 
         except (ApiError, TypeError, OSError):
             print('Error! Could not upload the files!') 
 
 def main(fname, created_dropbox_dir = False):
     if (not created_dropbox_dir):
         return 'Error! Could not create dir on Dropbox.'
-    #Создание временной папки 
+    #Creating a temporary directory 
     with tempfile.TemporaryDirectory() as tmpdirname:  
         print('Temporary directory created:', tmpdirname)
-        #Путь для хранения backup архива zip 
+        #Path for storing the backup zip archive
         in_backup_path ='{0}{1}{2}.zip'.format(tmpdirname, os.sep, fname)
         ignore_files = get_list_ignored_file(check_ignored_files(ignored_files))
-        #Создание zip файла 
+        #Create a zip file
         with zipfile.ZipFile(in_backup_path,'w') as newzip:
             for file in ignore_files:
                 newzip.write(file)
             print("The {}.zip archive has been created and the files have been written to it!".format(fname))
-        #backup zip ахрива с файлами на Dropbox
+        #Backup zip archive with files on Dropbox
         dropbox_backup(in_backup_path)
             
 if __name__ == '__main__':
