@@ -19,7 +19,7 @@ This project was built with modularity, extensibility and simplicity in mind.
 
 ## Installation
 
-1. git clone <https://github.com/IniSlice/DbxBackupProject.git>
+1. git clone <https://github.com/digitskiy/DbxBackupProject.git>
 2. Place the dbx_backup_project.py script in the directory containing the files and folders for backing up to Dropbox;
 3. Run the script, this will create the  ignored_list.yaml file;
 4. Open file ignored_list.yaml and add file names to the "Optional" item and folders that you do not want to archive and backup (this item is optional);
