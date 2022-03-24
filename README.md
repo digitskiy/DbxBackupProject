@@ -53,7 +53,7 @@ If you find a bug or have a request for improvement, please report a problem [Is
 
 ## Authors
 
-[**Sergey Chernetskiy**](https://github.com/IniSlice) - developer of this project.    
+[**Sergey Chernetskiy**](https://github.com/digitskiy) - developer of this project.    
 See also the list of [contributors](https://github.com/IniSlice/DbxBackupProject/graphs/contributors), who participated in this project.
 
 ## License
